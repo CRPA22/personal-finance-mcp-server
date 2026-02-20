@@ -44,6 +44,15 @@ class AccountRepository:
         stmt = select(Account).where(Account.user_id == user_id).order_by(Account.created_at.desc())
         return list(self._session.scalars(stmt).all())
 
+    def update_balance(self, account_id: uuid.UUID, new_balance: float) -> Account | None:
+        """Set account balance to new_balance. Returns account or None if not found."""
+        account = self.get_by_id(account_id)
+        if account is None:
+            return None
+        account.balance = float(new_balance)
+        self._session.flush()
+        return account
+
     def delete(self, account_id: uuid.UUID) -> bool:
         """Delete an account by id. Transactions are cascade-deleted. Returns True if deleted."""
         account = self.get_by_id(account_id)

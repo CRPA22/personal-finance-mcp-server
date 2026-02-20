@@ -49,7 +49,7 @@ def register_account_tools(mcp: FastMCP) -> None:
             logger.warning("create_account invalid user_id", extra={"user_id": user_id})
             return error_response("Invalid user_id format. Must be a valid UUID.")
 
-        logger.info("create_account", extra={"name": name, "type": account_type, "user_id": str(uid)})
+        logger.info("create_account", extra={"account_name": name, "account_type": account_type, "user_id": str(uid)})
 
         data = AccountCreate(
             user_id=uid,
@@ -77,6 +77,42 @@ def register_account_tools(mcp: FastMCP) -> None:
             return error_response(str(e))
         except Exception as e:
             logger.exception("create_account unexpected error", extra={"error_type": type(e).__name__})
+            return error_response(f"Unexpected error: {e!s}")
+
+    @mcp.tool()
+    def adjust_account_balance(account_id: str, new_balance: float) -> str:
+        """Set an account's balance to a new value (manual adjustment).
+
+        Args:
+            account_id: Account UUID to adjust.
+            new_balance: New balance value.
+
+        Returns:
+            JSON string with updated account or error message.
+        """
+        try:
+            aid = uuid.UUID(account_id)
+        except ValueError:
+            logger.warning("adjust_account_balance invalid account_id", extra={"account_id": account_id})
+            return error_response("Invalid account_id format. Must be a valid UUID.")
+
+        logger.info("adjust_account_balance", extra={"account_id": account_id, "new_balance": new_balance})
+
+        try:
+            with session_context() as session:
+                account_repo = AccountRepository(session)
+                user_repo = UserRepository(session)
+                service = AccountService(account_repo, user_repo)
+                account = service.adjust_balance(aid, new_balance)
+                return account.model_dump_json()
+        except NotFoundError as e:
+            logger.info("adjust_account_balance not found", extra={"message": str(e)})
+            return error_response(str(e))
+        except FinanceMCPError as e:
+            logger.warning("adjust_account_balance domain error", extra={"message": str(e)})
+            return error_response(str(e))
+        except Exception as e:
+            logger.exception("adjust_account_balance unexpected error", extra={"error_type": type(e).__name__})
             return error_response(f"Unexpected error: {e!s}")
 
     @mcp.tool()

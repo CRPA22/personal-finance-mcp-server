@@ -42,6 +42,32 @@ class TransactionRepository:
         stmt = select(Transaction).where(Transaction.id == transaction_id)
         return self._session.scalars(stmt).first()
 
+    def update(
+        self,
+        transaction_id: uuid.UUID,
+        amount: float | None = None,
+        transaction_type: str | None = None,
+        category: str | None = None,
+        transaction_date: date | None = None,
+        description: str | None = None,
+    ) -> Transaction | None:
+        """Update a transaction. Returns updated transaction or None if not found."""
+        transaction = self.get_by_id(transaction_id)
+        if transaction is None:
+            return None
+        if amount is not None:
+            transaction.amount = amount
+        if transaction_type is not None:
+            transaction.type = transaction_type
+        if category is not None:
+            transaction.category = category
+        if transaction_date is not None:
+            transaction.date = transaction_date
+        if description is not None:
+            transaction.description = description
+        self._session.flush()
+        return transaction
+
     def delete(self, transaction_id: uuid.UUID) -> bool:
         """Delete a transaction by id. Returns True if deleted."""
         transaction = self.get_by_id(transaction_id)

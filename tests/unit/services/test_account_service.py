@@ -62,3 +62,51 @@ def test_account_service_create_user_not_found() -> None:
         service.create(data)
 
     account_repo.create.assert_not_called()
+
+
+def test_account_service_adjust_balance_success() -> None:
+    """adjust_balance() updates balance and returns updated account."""
+    account_id = uuid.uuid4()
+    account = MagicMock(spec=Account)
+    account.id = account_id
+    account.user_id = uuid.uuid4()
+    account.name = "Test"
+    account.type = "checking"
+    account.currency = "USD"
+    account.balance = 100.0
+    account.created_at = MagicMock()
+
+    updated_account = MagicMock(spec=Account)
+    updated_account.id = account_id
+    updated_account.user_id = account.user_id
+    updated_account.name = "Test"
+    updated_account.type = "checking"
+    updated_account.currency = "USD"
+    updated_account.balance = 250.0
+    updated_account.created_at = account.created_at
+
+    account_repo = MagicMock()
+    account_repo.get_by_id.side_effect = [account, updated_account]
+    account_repo.update_balance.return_value = updated_account
+
+    user_repo = MagicMock()
+
+    service = AccountService(account_repo, user_repo)
+    result = service.adjust_balance(account_id, 250.0)
+
+    assert result.balance == 250.0
+    account_repo.update_balance.assert_called_once_with(account_id, 250.0)
+
+
+def test_account_service_adjust_balance_not_found() -> None:
+    """adjust_balance() raises NotFoundError when account does not exist."""
+    account_repo = MagicMock()
+    account_repo.get_by_id.return_value = None
+    user_repo = MagicMock()
+
+    service = AccountService(account_repo, user_repo)
+
+    with pytest.raises(NotFoundError, match="Account .* not found"):
+        service.adjust_balance(uuid.uuid4(), 100.0)
+
+    account_repo.update_balance.assert_not_called()

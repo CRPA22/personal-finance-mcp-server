@@ -97,7 +97,9 @@ Ver [docs/RUN_AND_TEST.md](docs/RUN_AND_TEST.md) para más opciones.
 | `get_token` | Obtiene JWT para pruebas |
 | `create_account` | Crea cuenta (checking, savings, investment) |
 | `delete_account` | Elimina cuenta y sus transacciones |
+| `adjust_account_balance` | Ajusta el saldo de una cuenta manualmente |
 | `add_transaction` | Añade transacción (income/expense) |
+| `edit_transaction` | Edita una transacción existente |
 | `delete_transaction` | Elimina transacción y revierte el balance |
 | `get_financial_status` | Balance total, flujo mensual, ratio de ahorro |
 | `analyze_month` | Análisis de un mes concreto |

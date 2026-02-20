@@ -46,6 +46,15 @@ class AccountService:
         accounts = self._account_repo.get_by_user(user_id)
         return [AccountSchema.model_validate(a) for a in accounts]
 
+    def adjust_balance(self, account_id: uuid.UUID, new_balance: float) -> AccountSchema:
+        """Set account balance to a new value (manual adjustment)."""
+        account = self._account_repo.get_by_id(account_id)
+        if account is None:
+            raise NotFoundError(f"Account {account_id} not found")
+        self._account_repo.update_balance(account_id, new_balance)
+        updated = self._account_repo.get_by_id(account_id)
+        return AccountSchema.model_validate(updated)
+
     def delete(self, account_id: uuid.UUID) -> None:
         """Delete an account and its transactions (cascade)."""
         account = self._account_repo.get_by_id(account_id)
