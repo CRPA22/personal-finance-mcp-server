@@ -1,0 +1,40 @@
+# Personal Finance MCP Server - Todo en Docker
+#
+# Levantar: docker compose -f infra/docker/docker-compose.yml up -d
+# Probar:   docker compose -f infra/docker/docker-compose.yml run --rm -it app
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: finance-mcp-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: finance_mcp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    container_name: finance-mcp-app
+    stdin_open: true
+    tty: true
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/finance_mcp
+      LOG_LEVEL: INFO
+      JWT_SECRET: dev-secret-change-in-prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
