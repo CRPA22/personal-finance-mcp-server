@@ -6,6 +6,14 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
+class AccountUpdate(BaseModel):
+    """Input for updating an account (all fields optional)."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    type: str | None = Field(default=None, pattern="^(checking|savings|investment)$")
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
+
+
 class AccountCreate(BaseModel):
     """Input for creating an account."""
 

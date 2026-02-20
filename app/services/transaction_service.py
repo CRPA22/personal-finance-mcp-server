@@ -5,6 +5,7 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
+from app.core.categories import TRANSFER_CATEGORY
 from app.core.exceptions import NotFoundError
 from app.db.repositories.account_repository import AccountRepository
 from app.db.repositories.transaction_repository import TransactionRepository
@@ -65,8 +66,10 @@ class TransactionService:
         account_id: uuid.UUID,
         from_date: date | None = None,
         to_date: date | None = None,
+        category: str | None = None,
+        transaction_type: str | None = None,
     ) -> list[TransactionSchema]:
-        """Get transactions for an account."""
+        """Get transactions for an account, optionally filtered."""
         account = self._account_repo.get_by_id(account_id)
         if account is None:
             raise NotFoundError(f"Account {account_id} not found")
@@ -76,7 +79,42 @@ class TransactionService:
             from_date=from_date,
             to_date=to_date,
         )
-        return [TransactionSchema.model_validate(t) for t in transactions]
+        result = [TransactionSchema.model_validate(t) for t in transactions]
+        if category:
+            result = [t for t in result if t.category == category]
+        if transaction_type:
+            result = [t for t in result if t.type == transaction_type]
+        return result
+
+    def get_by_user(
+        self,
+        user_id: uuid.UUID,
+        account_id: uuid.UUID | None = None,
+        from_date: date | None = None,
+        to_date: date | None = None,
+        category: str | None = None,
+        transaction_type: str | None = None,
+    ) -> list[TransactionSchema]:
+        """Get transactions for a user (all accounts or one account), with optional filters."""
+        accounts = self._account_repo.get_by_user(user_id)
+        if not accounts:
+            return []
+
+        if account_id is not None:
+            return self.get_by_account(
+                account_id, from_date, to_date, category, transaction_type
+            )
+
+        account_ids = [a.id for a in accounts]
+        transactions = self._transaction_repo.get_by_accounts(
+            account_ids, from_date=from_date, to_date=to_date
+        )
+        result = [TransactionSchema.model_validate(t) for t in transactions]
+        if category:
+            result = [t for t in result if t.category == category]
+        if transaction_type:
+            result = [t for t in result if t.type == transaction_type]
+        return result
 
     def update(self, transaction_id: uuid.UUID, data: TransactionUpdate) -> TransactionSchema:
         """Update a transaction and adjust account balance accordingly."""
@@ -134,3 +172,56 @@ class TransactionService:
             self._session.flush()
 
         self._transaction_repo.delete(transaction_id)
+
+    def transfer(
+        self,
+        from_account_id: uuid.UUID,
+        to_account_id: uuid.UUID,
+        amount: float,
+        transaction_date: date | None = None,
+        description: str | None = None,
+    ) -> tuple[TransactionSchema, TransactionSchema]:
+        """Transfer money between accounts. Creates expense in source, income in destination."""
+        if from_account_id == to_account_id:
+            raise ValueError("Source and destination accounts must be different")
+
+        from_account = self._account_repo.get_by_id(from_account_id)
+        if from_account is None:
+            raise NotFoundError(f"Account {from_account_id} not found")
+
+        to_account = self._account_repo.get_by_id(to_account_id)
+        if to_account is None:
+            raise NotFoundError(f"Account {to_account_id} not found")
+
+        if amount <= 0:
+            raise ValueError("Amount must be positive")
+
+        dt = transaction_date if transaction_date is not None else date.today()
+        desc = description or f"Transfer to account {to_account_id}"
+
+        # Expense from source account
+        tx_out = self._transaction_repo.create(
+            account_id=from_account_id,
+            amount=amount,
+            transaction_type="expense",
+            category=TRANSFER_CATEGORY,
+            transaction_date=dt,
+            description=desc,
+        )
+        self._update_balance(from_account, amount, "expense")
+
+        # Income to destination account
+        tx_in = self._transaction_repo.create(
+            account_id=to_account_id,
+            amount=amount,
+            transaction_type="income",
+            category=TRANSFER_CATEGORY,
+            transaction_date=dt,
+            description=description or f"Transfer from account {from_account_id}",
+        )
+        self._update_balance(to_account, amount, "income")
+
+        return (
+            TransactionSchema.model_validate(tx_out),
+            TransactionSchema.model_validate(tx_in),
+        )

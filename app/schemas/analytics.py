@@ -69,11 +69,22 @@ class AnomaliesSchema(BaseModel):
     std: float
 
 
+class AccountSummaryInStatus(BaseModel):
+    """Account summary in financial status."""
+
+    id: str
+    name: str
+    type: str
+    currency: str
+    balance: float
+
+
 class FinancialStatusSchema(BaseModel):
     """Aggregated financial status."""
 
     total_balance: float
-    by_account: dict[str, float]
+    by_account: list[AccountSummaryInStatus]
+    by_currency: dict[str, float]
     savings_ratio: float | None
     monthly_flow: list[MonthlyFlowSchema]
     category_distribution: CategoryDistributionSchema

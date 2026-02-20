@@ -13,7 +13,10 @@ def test_analytics_service_get_financial_status() -> None:
     user_id = uuid.uuid4()
     account = MagicMock(spec=Account)
     account.id = uuid.uuid4()
+    account.name = "Main Account"
+    account.type = "checking"
     account.balance = 150.0  # Updated by transaction service after tx
+    account.currency = "USD"
 
     tx1 = MagicMock(spec=Transaction)
     tx1.amount = 50
@@ -34,6 +37,12 @@ def test_analytics_service_get_financial_status() -> None:
     result = service.get_financial_status(user_id)
 
     assert result.total_balance == 150.0
+    assert len(result.by_account) == 1
+    assert result.by_account[0].name == "Main Account"
+    assert result.by_account[0].type == "checking"
+    assert result.by_account[0].currency == "USD"
+    assert result.by_account[0].balance == 150.0
+    assert result.by_currency == {"USD": 150.0}
     assert len(result.monthly_flow) == 1
     assert result.monthly_flow[0].income == 50
     assert result.monthly_flow[0].expense == 0

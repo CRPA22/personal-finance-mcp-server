@@ -95,13 +95,20 @@ Ver [docs/RUN_AND_TEST.md](docs/RUN_AND_TEST.md) para más opciones.
 |------|-------------|
 | `health_check` | Comprueba conexión con la base de datos |
 | `get_token` | Obtiene JWT para pruebas |
+| `list_accounts` | Lista cuentas con nombre, tipo, moneda y saldo |
 | `create_account` | Crea cuenta (checking, savings, investment) |
+| `edit_account` | Edita cuenta (nombre, tipo, moneda) |
 | `delete_account` | Elimina cuenta y sus transacciones |
 | `adjust_account_balance` | Ajusta el saldo de una cuenta manualmente |
+| `transfer` | Transfiere dinero entre cuentas (crea gasto en origen, ingreso en destino) |
+| `get_categories` | Lista categorías predefinidas sugeridas (income/expense) |
+| `list_transactions` | Lista transacciones con filtros (cuenta, fechas, categoría, tipo) |
+| `export_transactions` | Exporta transacciones a CSV o JSON |
+| `get_transaction` | Obtiene una transacción por ID |
 | `add_transaction` | Añade transacción (income/expense) |
 | `edit_transaction` | Edita una transacción existente |
 | `delete_transaction` | Elimina transacción y revierte el balance |
-| `get_financial_status` | Balance total, flujo mensual, ratio de ahorro |
+| `get_financial_status` | Balance total, por cuenta, por moneda, flujo mensual, ratio de ahorro |
 | `analyze_month` | Análisis de un mes concreto |
 | `forecast_balance` | Proyección de balance a N meses |
 | `detect_anomalies` | Detecta transacciones anómalas (Z-score) |

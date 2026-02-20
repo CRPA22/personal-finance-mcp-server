@@ -44,6 +44,26 @@ class AccountRepository:
         stmt = select(Account).where(Account.user_id == user_id).order_by(Account.created_at.desc())
         return list(self._session.scalars(stmt).all())
 
+    def update(
+        self,
+        account_id: uuid.UUID,
+        name: str | None = None,
+        account_type: str | None = None,
+        currency: str | None = None,
+    ) -> Account | None:
+        """Update account fields. Returns account or None if not found."""
+        account = self.get_by_id(account_id)
+        if account is None:
+            return None
+        if name is not None:
+            account.name = name
+        if account_type is not None:
+            account.type = account_type
+        if currency is not None:
+            account.currency = currency
+        self._session.flush()
+        return account
+
     def update_balance(self, account_id: uuid.UUID, new_balance: float) -> Account | None:
         """Set account balance to new_balance. Returns account or None if not found."""
         account = self.get_by_id(account_id)

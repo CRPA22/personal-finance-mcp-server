@@ -5,7 +5,6 @@ from datetime import date
 
 from app.analytics.anomaly import AnomalyResult, detect_anomalies
 from app.analytics.calculator import (
-    balance_by_account,
     distribution_by_category,
     monthly_flow,
     savings_ratio,
@@ -17,6 +16,7 @@ from app.db.repositories.account_repository import AccountRepository
 from app.db.repositories.transaction_repository import TransactionRepository
 from app.db.repositories.user_repository import UserRepository
 from app.schemas.analytics import (
+    AccountSummaryInStatus,
     AnomaliesSchema,
     AnomalyPointSchema,
     CategoryDistributionSchema,
@@ -70,14 +70,34 @@ class AnalyticsService:
 
         # Use account balances as source of truth (they're updated by transaction service)
         total = total_balance(acc_records, transactions=None)
-        by_acc = balance_by_account(acc_records, transactions=None)
         ratio = savings_ratio(tx_records)
         flow = monthly_flow(tx_records)
         dist = distribution_by_category(tx_records, "expense")
 
+        # Build by_account: full account info (id, name, type, currency, balance)
+        by_account_list = [
+            AccountSummaryInStatus(
+                id=str(acc.id),
+                name=getattr(acc, "name", ""),
+                type=getattr(acc, "type", ""),
+                currency=getattr(acc, "currency", "USD"),
+                balance=round(float(getattr(acc, "balance", 0)), 2),
+            )
+            for acc in accounts
+        ]
+
+        # Build by_currency: sum balances per currency
+        by_currency: dict[str, float] = {}
+        for acc in accounts:
+            curr = getattr(acc, "currency", "USD")
+            bal = float(getattr(acc, "balance", 0))
+            by_currency[curr] = by_currency.get(curr, 0) + bal
+        by_currency = {k: round(v, 2) for k, v in by_currency.items()}
+
         return FinancialStatusSchema(
             total_balance=total,
-            by_account={k: round(v, 2) for k, v in by_acc.items()},
+            by_account=by_account_list,
+            by_currency=by_currency,
             savings_ratio=round(ratio, 4) if ratio is not None else None,
             monthly_flow=[
                 MonthlyFlowSchema(

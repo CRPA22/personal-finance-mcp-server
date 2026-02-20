@@ -28,7 +28,7 @@ def register_status_tools(mcp: FastMCP) -> None:
             user_id: User UUID. If omitted, uses default user (dev only).
 
         Returns:
-            JSON with total_balance, by_account, savings_ratio, monthly_flow, category_distribution.
+            JSON with total_balance, by_account (id, name, type, currency, balance), by_currency, savings_ratio, monthly_flow, category_distribution.
         """
         try:
             uid = uuid.UUID(user_id) if user_id else uuid.UUID(settings.default_user_id)

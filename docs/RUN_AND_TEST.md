@@ -154,13 +154,20 @@ npx @modelcontextprotocol/inspector uv run python -m app.mcp.server
 |------|-------------|
 | `health_check` | Comprueba conectividad con la base de datos |
 | `get_token` | Obtiene JWT (para pruebas) |
+| `list_accounts` | Lista cuentas con nombre, tipo, moneda y saldo |
 | `create_account` | Crea cuenta (checking/savings/investment) |
+| `edit_account` | Edita cuenta (nombre, tipo, moneda) |
 | `delete_account` | Elimina cuenta y sus transacciones |
 | `adjust_account_balance` | Ajusta el saldo de una cuenta manualmente |
+| `transfer` | Transfiere dinero entre cuentas |
+| `get_categories` | Lista categorías predefinidas sugeridas |
+| `list_transactions` | Lista transacciones con filtros |
+| `export_transactions` | Exporta transacciones a CSV o JSON |
+| `get_transaction` | Obtiene transacción por ID |
 | `add_transaction` | Añade transacción (income/expense) |
 | `edit_transaction` | Edita una transacción existente |
 | `delete_transaction` | Elimina transacción y revierte balance |
-| `get_financial_status` | Estado: balance, flujo, ratio ahorro |
+| `get_financial_status` | Estado: balance, por cuenta, por moneda, flujo, ratio ahorro |
 | `analyze_month` | Análisis de un mes |
 | `forecast_balance` | Proyección de balance N meses |
 | `detect_anomalies` | Detección de anomalías por Z-score |

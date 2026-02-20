@@ -5,7 +5,7 @@ import uuid
 from app.core.exceptions import NotFoundError
 from app.db.repositories.account_repository import AccountRepository
 from app.db.repositories.user_repository import UserRepository
-from app.schemas.account import AccountCreate, AccountSchema
+from app.schemas.account import AccountCreate, AccountSchema, AccountUpdate
 
 
 class AccountService:
@@ -45,6 +45,18 @@ class AccountService:
         """Get all accounts for a user."""
         accounts = self._account_repo.get_by_user(user_id)
         return [AccountSchema.model_validate(a) for a in accounts]
+
+    def update(self, account_id: uuid.UUID, data: AccountUpdate) -> AccountSchema:
+        """Update account name, type or currency."""
+        account = self._account_repo.get_by_id(account_id)
+        if account is None:
+            raise NotFoundError(f"Account {account_id} not found")
+        name = data.name if data.name is not None else account.name
+        acc_type = data.type if data.type is not None else account.type
+        currency = data.currency if data.currency is not None else account.currency
+        self._account_repo.update(account_id, name=name, account_type=acc_type, currency=currency)
+        updated = self._account_repo.get_by_id(account_id)
+        return AccountSchema.model_validate(updated)
 
     def adjust_balance(self, account_id: uuid.UUID, new_balance: float) -> AccountSchema:
         """Set account balance to a new value (manual adjustment)."""

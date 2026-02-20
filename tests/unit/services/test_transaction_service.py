@@ -222,3 +222,69 @@ def test_transaction_service_update_not_found() -> None:
         service.update(uuid.uuid4(), data)
 
     transaction_repo.update.assert_not_called()
+
+
+def test_transaction_service_transfer_success() -> None:
+    """transfer() creates expense in source, income in destination, updates both balances."""
+    from_account_id = uuid.uuid4()
+    to_account_id = uuid.uuid4()
+    from_account = MagicMock(spec=Account)
+    from_account.id = from_account_id
+    from_account.balance = 100.0
+    to_account = MagicMock(spec=Account)
+    to_account.id = to_account_id
+    to_account.balance = 50.0
+
+    tx_out = MagicMock(spec=Transaction)
+    tx_out.id = uuid.uuid4()
+    tx_out.account_id = from_account_id
+    tx_out.amount = 30.0
+    tx_out.type = "expense"
+    tx_out.category = "transferencia"
+    tx_out.date = date(2025, 2, 19)
+    tx_out.description = None
+    tx_out.created_at = MagicMock()
+
+    tx_in = MagicMock(spec=Transaction)
+    tx_in.id = uuid.uuid4()
+    tx_in.account_id = to_account_id
+    tx_in.amount = 30.0
+    tx_in.type = "income"
+    tx_in.category = "transferencia"
+    tx_in.date = date(2025, 2, 19)
+    tx_in.description = None
+    tx_in.created_at = MagicMock()
+
+    transaction_repo = MagicMock()
+    transaction_repo.create.side_effect = [tx_out, tx_in]
+
+    account_repo = MagicMock()
+    account_repo.get_by_id.side_effect = [from_account, to_account]
+
+    session = MagicMock()
+
+    service = TransactionService(transaction_repo, account_repo, session)
+    result_out, result_in = service.transfer(from_account_id, to_account_id, 30.0)
+
+    assert result_out.type == "expense"
+    assert result_out.amount == 30.0
+    assert result_in.type == "income"
+    assert result_in.amount == 30.0
+    assert from_account.balance == 70.0
+    assert to_account.balance == 80.0
+    assert transaction_repo.create.call_count == 2
+
+
+def test_transaction_service_transfer_same_account_raises() -> None:
+    """transfer() raises ValueError when source and destination are the same."""
+    account_id = uuid.uuid4()
+    transaction_repo = MagicMock()
+    account_repo = MagicMock()
+    session = MagicMock()
+
+    service = TransactionService(transaction_repo, account_repo, session)
+
+    with pytest.raises(ValueError, match="must be different"):
+        service.transfer(account_id, account_id, 10.0)
+
+    transaction_repo.create.assert_not_called()

@@ -7,7 +7,7 @@ import pytest
 
 from app.core.exceptions import NotFoundError
 from app.models import Account, User
-from app.schemas.account import AccountCreate
+from app.schemas.account import AccountCreate, AccountUpdate
 from app.services.account_service import AccountService
 
 
@@ -110,3 +110,42 @@ def test_account_service_adjust_balance_not_found() -> None:
         service.adjust_balance(uuid.uuid4(), 100.0)
 
     account_repo.update_balance.assert_not_called()
+
+
+def test_account_service_update_success() -> None:
+    """update() changes name, type, currency and returns updated account."""
+    account_id = uuid.uuid4()
+    user_id = uuid.uuid4()
+    account = MagicMock(spec=Account)
+    account.id = account_id
+    account.user_id = user_id
+    account.name = "Old Name"
+    account.type = "checking"
+    account.currency = "USD"
+    account.balance = 100.0
+    account.created_at = MagicMock()
+
+    updated_account = MagicMock(spec=Account)
+    updated_account.id = account_id
+    updated_account.user_id = user_id
+    updated_account.name = "New Name"
+    updated_account.type = "savings"
+    updated_account.currency = "EUR"
+    updated_account.balance = 100.0
+    updated_account.created_at = account.created_at
+
+    account_repo = MagicMock()
+    account_repo.get_by_id.side_effect = [account, updated_account]
+
+    user_repo = MagicMock()
+    service = AccountService(account_repo, user_repo)
+    data = AccountUpdate(name="New Name", type="savings", currency="EUR")
+
+    result = service.update(account_id, data)
+
+    assert result.name == "New Name"
+    assert result.type == "savings"
+    assert result.currency == "EUR"
+    account_repo.update.assert_called_once_with(
+        account_id, name="New Name", account_type="savings", currency="EUR"
+    )
