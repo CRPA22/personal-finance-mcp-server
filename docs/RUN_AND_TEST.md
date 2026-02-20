@@ -171,6 +171,8 @@ npx @modelcontextprotocol/inspector uv run python -m app.mcp.server
 | `analyze_month` | Análisis de un mes |
 | `forecast_balance` | Proyección de balance N meses |
 | `detect_anomalies` | Detección de anomalías por Z-score |
+| `generate_expense_report` | PDF de gastos (categorías, gráfico torta) |
+| `generate_income_expense_report` | PDF de ingresos/egresos (ratio ahorro, gráfico barras) |
 
 ---
 

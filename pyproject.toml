@@ -13,6 +13,7 @@ dependencies = [
     "pydantic-settings>=2",
     "python-jose[cryptography]",
     "passlib[bcrypt]",
+    "reportlab>=4.0",
 ]
 
 [project.optional-dependencies]

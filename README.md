@@ -112,6 +112,8 @@ Ver [docs/RUN_AND_TEST.md](docs/RUN_AND_TEST.md) para más opciones.
 | `analyze_month` | Análisis de un mes concreto |
 | `forecast_balance` | Proyección de balance a N meses |
 | `detect_anomalies` | Detecta transacciones anómalas (Z-score) |
+| `generate_expense_report` | Genera PDF de gastos (por categoría, gráfico torta) |
+| `generate_income_expense_report` | Genera PDF de ingresos/egresos (ratio ahorro, gráfico barras) |
 
 ---
 
