@@ -45,3 +45,10 @@ class AccountService:
         """Get all accounts for a user."""
         accounts = self._account_repo.get_by_user(user_id)
         return [AccountSchema.model_validate(a) for a in accounts]
+
+    def delete(self, account_id: uuid.UUID) -> None:
+        """Delete an account and its transactions (cascade)."""
+        account = self._account_repo.get_by_id(account_id)
+        if account is None:
+            raise NotFoundError(f"Account {account_id} not found")
+        self._account_repo.delete(account_id)

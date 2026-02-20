@@ -43,3 +43,12 @@ class AccountRepository:
         """Get all accounts for a user."""
         stmt = select(Account).where(Account.user_id == user_id).order_by(Account.created_at.desc())
         return list(self._session.scalars(stmt).all())
+
+    def delete(self, account_id: uuid.UUID) -> bool:
+        """Delete an account by id. Transactions are cascade-deleted. Returns True if deleted."""
+        account = self.get_by_id(account_id)
+        if account is None:
+            return False
+        self._session.delete(account)
+        self._session.flush()
+        return True

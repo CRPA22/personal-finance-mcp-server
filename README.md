@@ -96,7 +96,9 @@ Ver [docs/RUN_AND_TEST.md](docs/RUN_AND_TEST.md) para más opciones.
 | `health_check` | Comprueba conexión con la base de datos |
 | `get_token` | Obtiene JWT para pruebas |
 | `create_account` | Crea cuenta (checking, savings, investment) |
+| `delete_account` | Elimina cuenta y sus transacciones |
 | `add_transaction` | Añade transacción (income/expense) |
+| `delete_transaction` | Elimina transacción y revierte el balance |
 | `get_financial_status` | Balance total, flujo mensual, ratio de ahorro |
 | `analyze_month` | Análisis de un mes concreto |
 | `forecast_balance` | Proyección de balance a N meses |

@@ -1,5 +1,6 @@
-"""Transaction tools - add_transaction."""
+"""Transaction tools - add_transaction, delete_transaction."""
 
+import json
 import uuid
 from datetime import date
 
@@ -91,4 +92,42 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             return error_response(str(e))
         except Exception as e:
             logger.exception("add_transaction unexpected error", extra={"error_type": type(e).__name__})
+            return error_response(f"Unexpected error: {e!s}")
+
+    @mcp.tool()
+    def delete_transaction(transaction_id: str) -> str:
+        """Delete a transaction and revert its effect on the account balance.
+
+        Args:
+            transaction_id: Transaction UUID to delete.
+
+        Returns:
+            JSON with success message or error.
+        """
+        try:
+            tid = uuid.UUID(transaction_id)
+        except ValueError:
+            logger.warning("delete_transaction invalid transaction_id", extra={"transaction_id": transaction_id})
+            return error_response("Invalid transaction_id format. Must be a valid UUID.")
+
+        logger.info("delete_transaction", extra={"transaction_id": transaction_id})
+
+        try:
+            with session_context() as session:
+                transaction_repo = TransactionRepository(session)
+                account_repo = AccountRepository(session)
+                service = TransactionService(
+                    transaction_repo,
+                    account_repo,
+                    session,
+                )
+                service.delete(tid)
+                return json.dumps({"message": "Transaction deleted successfully", "transaction_id": transaction_id})
+        except NotFoundError as e:
+            logger.info("delete_transaction not found", extra={"message": str(e)})
+            return error_response(str(e))
+        except FinanceMCPError as e:
+            return error_response(str(e))
+        except Exception as e:
+            logger.exception("delete_transaction unexpected error", extra={"error_type": type(e).__name__})
             return error_response(f"Unexpected error: {e!s}")

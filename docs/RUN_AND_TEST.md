@@ -155,7 +155,9 @@ npx @modelcontextprotocol/inspector uv run python -m app.mcp.server
 | `health_check` | Comprueba conectividad con la base de datos |
 | `get_token` | Obtiene JWT (para pruebas) |
 | `create_account` | Crea cuenta (checking/savings/investment) |
+| `delete_account` | Elimina cuenta y sus transacciones |
 | `add_transaction` | Añade transacción (income/expense) |
+| `delete_transaction` | Elimina transacción y revierte balance |
 | `get_financial_status` | Estado: balance, flujo, ratio ahorro |
 | `analyze_month` | Análisis de un mes |
 | `forecast_balance` | Proyección de balance N meses |

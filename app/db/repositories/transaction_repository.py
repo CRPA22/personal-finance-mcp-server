@@ -42,6 +42,15 @@ class TransactionRepository:
         stmt = select(Transaction).where(Transaction.id == transaction_id)
         return self._session.scalars(stmt).first()
 
+    def delete(self, transaction_id: uuid.UUID) -> bool:
+        """Delete a transaction by id. Returns True if deleted."""
+        transaction = self.get_by_id(transaction_id)
+        if transaction is None:
+            return False
+        self._session.delete(transaction)
+        self._session.flush()
+        return True
+
     def get_by_account(
         self,
         account_id: uuid.UUID,

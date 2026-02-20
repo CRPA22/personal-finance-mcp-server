@@ -78,3 +78,43 @@ def register_account_tools(mcp: FastMCP) -> None:
         except Exception as e:
             logger.exception("create_account unexpected error", extra={"error_type": type(e).__name__})
             return error_response(f"Unexpected error: {e!s}")
+
+    @mcp.tool()
+    def delete_account(account_id: str, user_id: str | None = None) -> str:
+        """Delete an account and all its transactions.
+
+        Args:
+            account_id: Account UUID to delete.
+            user_id: User UUID. If omitted, uses default user.
+
+        Returns:
+            JSON with success message or error.
+        """
+        try:
+            aid = uuid.UUID(account_id)
+        except ValueError:
+            logger.warning("delete_account invalid account_id", extra={"account_id": account_id})
+            return error_response("Invalid account_id format. Must be a valid UUID.")
+
+        try:
+            uid = uuid.UUID(user_id) if user_id else uuid.UUID(settings.default_user_id)
+        except ValueError:
+            return error_response("Invalid user_id format. Must be a valid UUID.")
+
+        logger.info("delete_account", extra={"account_id": account_id, "user_id": str(uid)})
+
+        try:
+            with session_context() as session:
+                account_repo = AccountRepository(session)
+                user_repo = UserRepository(session)
+                service = AccountService(account_repo, user_repo)
+                service.delete(aid)
+                return json.dumps({"message": "Account deleted successfully", "account_id": account_id})
+        except NotFoundError as e:
+            logger.info("delete_account not found", extra={"message": str(e)})
+            return error_response(str(e))
+        except FinanceMCPError as e:
+            return error_response(str(e))
+        except Exception as e:
+            logger.exception("delete_account unexpected error", extra={"error_type": type(e).__name__})
+            return error_response(f"Unexpected error: {e!s}")

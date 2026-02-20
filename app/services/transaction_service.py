@@ -77,3 +77,20 @@ class TransactionService:
             to_date=to_date,
         )
         return [TransactionSchema.model_validate(t) for t in transactions]
+
+    def delete(self, transaction_id: uuid.UUID) -> None:
+        """Delete a transaction and revert account balance."""
+        transaction = self._transaction_repo.get_by_id(transaction_id)
+        if transaction is None:
+            raise NotFoundError(f"Transaction {transaction_id} not found")
+
+        account = self._account_repo.get_by_id(transaction.account_id)
+        if account is not None:
+            # Revert balance: income was added, expense was subtracted
+            if transaction.type == "income":
+                account.balance = float(account.balance) - transaction.amount
+            else:
+                account.balance = float(account.balance) + transaction.amount
+            self._session.flush()
+
+        self._transaction_repo.delete(transaction_id)
