@@ -165,10 +165,11 @@ class TransactionService:
         account = self._account_repo.get_by_id(transaction.account_id)
         if account is not None:
             # Revert balance: income was added, expense was subtracted
+            amount = float(transaction.amount)
             if transaction.type == "income":
-                account.balance = float(account.balance) - transaction.amount
+                account.balance = float(account.balance) - amount
             else:
-                account.balance = float(account.balance) + transaction.amount
+                account.balance = float(account.balance) + amount
             self._session.flush()
 
         self._transaction_repo.delete(transaction_id)
