@@ -90,6 +90,7 @@ class TransactionRepository:
         account_id: uuid.UUID,
         from_date: date | None = None,
         to_date: date | None = None,
+        limit: int | None = None,
     ) -> list[Transaction]:
         """Get transactions for an account, optionally filtered by date range."""
         stmt = (
@@ -101,8 +102,9 @@ class TransactionRepository:
             stmt = stmt.where(Transaction.date >= from_date)
         if to_date is not None:
             stmt = stmt.where(Transaction.date <= to_date)
-
         stmt = stmt.order_by(Transaction.date.desc())
+        if limit is not None:
+            stmt = stmt.limit(limit)
         return list(self._session.scalars(stmt).all())
 
     def get_by_accounts(
@@ -110,6 +112,7 @@ class TransactionRepository:
         account_ids: list[uuid.UUID],
         from_date: date | None = None,
         to_date: date | None = None,
+        limit: int | None = None,
     ) -> list[Transaction]:
         """Get transactions for multiple accounts."""
         if not account_ids:
@@ -124,4 +127,6 @@ class TransactionRepository:
         if to_date is not None:
             stmt = stmt.where(Transaction.date <= to_date)
         stmt = stmt.order_by(Transaction.date.desc())
-        return list(self._session.scalars(stmt).unique().all())
+        if limit is not None:
+            stmt = stmt.limit(limit)
+        return list(self._session.scalars(stmt).all())

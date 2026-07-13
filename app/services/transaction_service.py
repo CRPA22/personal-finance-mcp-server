@@ -106,6 +106,7 @@ class TransactionService:
         to_date: date | None = None,
         category: str | None = None,
         transaction_type: str | None = None,
+        limit: int | None = None,
     ) -> list[TransactionSchema]:
         """Get transactions for a user (all accounts or one account), with optional filters."""
         accounts = self._account_repo.get_by_user(user_id)
@@ -117,13 +118,16 @@ class TransactionService:
 
         account_ids = [a.id for a in accounts]
         transactions = self._transaction_repo.get_by_accounts(
-            account_ids, from_date=from_date, to_date=to_date
+            account_ids, from_date=from_date, to_date=to_date,
+            limit=limit if not (category or transaction_type) else None,
         )
         result = [TransactionSchema.model_validate(t) for t in transactions]
         if category:
             result = [t for t in result if t.category == category]
         if transaction_type:
             result = [t for t in result if t.type == transaction_type]
+        if limit is not None and (category or transaction_type):
+            result = result[:limit]
         return result
 
     def update(self, transaction_id: uuid.UUID, data: TransactionUpdate) -> TransactionSchema:

@@ -125,6 +125,7 @@ def register_transaction_tools(mcp: FastMCP) -> None:
         to_date: str | None = None,
         category: str | None = None,
         transaction_type: str | None = None,
+        limit: int | None = None,
         user_id: str | None = None,
     ) -> str:
         """List transactions for an account or all user accounts, with optional filters.
@@ -135,6 +136,7 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             to_date: End date YYYY-MM-DD. Omit for no upper bound.
             category: Filter by category (e.g. groceries).
             transaction_type: Filter by income or expense.
+            limit: Maximum number of transactions to return (e.g. 20 for last 20).
             user_id: User UUID. If omitted, uses default user.
 
         Returns:
@@ -186,6 +188,7 @@ def register_transaction_tools(mcp: FastMCP) -> None:
                     to_date=parsed_to,
                     category=category,
                     transaction_type=transaction_type,
+                    limit=limit,
                 )
                 return json.dumps([t.model_dump(mode="json") for t in transactions])
         except NotFoundError as e:
