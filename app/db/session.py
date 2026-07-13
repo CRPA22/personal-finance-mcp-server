@@ -16,6 +16,8 @@ engine = create_engine(
     _sync_url,
     echo=False,
     pool_pre_ping=True,
+    connect_args={"options": "-c statement_timeout=30000"},
+    execution_options={"prepared_statement_cache_size": 0},
 )
 
 SessionLocal = sessionmaker(

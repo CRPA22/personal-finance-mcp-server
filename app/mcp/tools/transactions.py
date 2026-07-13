@@ -15,6 +15,7 @@ from app.core.exceptions import FinanceMCPError, NotFoundError
 from app.utils.errors import error_response
 from app.utils.logging import get_logger
 from app.db.repositories.account_repository import AccountRepository
+from app.db.repositories.category_repository import CategoryRepository
 from app.db.repositories.transaction_repository import TransactionRepository
 from app.db.session import session_context
 from app.schemas.transaction import TransactionCreate, TransactionUpdate
@@ -65,9 +66,11 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             with session_context() as session:
                 transaction_repo = TransactionRepository(session)
                 account_repo = AccountRepository(session)
+                category_repo = CategoryRepository(session)
                 service = TransactionService(
                     transaction_repo,
                     account_repo,
+                    category_repo,
                     session,
                 )
                 tx_out, tx_in = service.transfer(
@@ -169,9 +172,11 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             with session_context() as session:
                 transaction_repo = TransactionRepository(session)
                 account_repo = AccountRepository(session)
+                category_repo = CategoryRepository(session)
                 service = TransactionService(
                     transaction_repo,
                     account_repo,
+                    category_repo,
                     session,
                 )
                 transactions = service.get_by_user(
@@ -251,9 +256,11 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             with session_context() as session:
                 transaction_repo = TransactionRepository(session)
                 account_repo = AccountRepository(session)
+                category_repo = CategoryRepository(session)
                 service = TransactionService(
                     transaction_repo,
                     account_repo,
+                    category_repo,
                     session,
                 )
                 transactions = service.get_by_user(
@@ -318,9 +325,11 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             with session_context() as session:
                 transaction_repo = TransactionRepository(session)
                 account_repo = AccountRepository(session)
+                category_repo = CategoryRepository(session)
                 service = TransactionService(
                     transaction_repo,
                     account_repo,
+                    category_repo,
                     session,
                 )
                 transaction = service.get_by_id(tid)
@@ -387,9 +396,11 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             with session_context() as session:
                 transaction_repo = TransactionRepository(session)
                 account_repo = AccountRepository(session)
+                category_repo = CategoryRepository(session)
                 service = TransactionService(
                     transaction_repo,
                     account_repo,
+                    category_repo,
                     session,
                 )
                 transaction = service.create(data)
@@ -457,9 +468,11 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             with session_context() as session:
                 transaction_repo = TransactionRepository(session)
                 account_repo = AccountRepository(session)
+                category_repo = CategoryRepository(session)
                 service = TransactionService(
                     transaction_repo,
                     account_repo,
+                    category_repo,
                     session,
                 )
                 transaction = service.update(tid, data)
@@ -499,9 +512,11 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             with session_context() as session:
                 transaction_repo = TransactionRepository(session)
                 account_repo = AccountRepository(session)
+                category_repo = CategoryRepository(session)
                 service = TransactionService(
                     transaction_repo,
                     account_repo,
+                    category_repo,
                     session,
                 )
                 service.delete(tid)

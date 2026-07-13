@@ -32,7 +32,7 @@ def _to_transaction_record(tx: object) -> TransactionRecord:
     return TransactionRecord(
         amount=float(getattr(tx, "amount", 0)),
         type=getattr(tx, "type", "expense"),
-        category=getattr(tx, "category", ""),
+        category=(_c.name if hasattr(_c := getattr(tx, "category", ""), "name") else (_c or "")),
         date=getattr(tx, "date"),
         account_id=str(getattr(tx, "account_id", "")),
     )

@@ -114,7 +114,9 @@ class ReportService:
 
             by_currency[curr].transactions.append(row)
 
-            if tx.type == "income":
+            if tx.type == "transfer":
+                pass  # transfers no afectan ingresos ni gastos del reporte
+            elif tx.type == "income":
                 by_currency[curr].total_income += float(tx.amount)
             else:
                 by_currency[curr].total_expenses += float(tx.amount)
@@ -129,6 +131,8 @@ class ReportService:
             lambda: {"income": 0.0, "expense": 0.0, "net": 0.0}
         )
         for tx in transactions:
+            if tx.type == "transfer":
+                continue
             key = (tx.date.year, tx.date.month)
             if tx.type == "income":
                 monthly[key]["income"] += float(tx.amount)

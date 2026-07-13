@@ -3,23 +3,25 @@
 from fastmcp import FastMCP
 
 from app.mcp.tools.accounts import register_account_tools
-from app.mcp.tools.auth_tools import register_auth_tools
-from app.utils.logging import configure_logging, get_logger
 from app.mcp.tools.analysis import register_analysis_tools
+from app.mcp.tools.auth_tools import register_auth_tools
+from app.mcp.tools.budgets import register_budget_tools
 from app.mcp.tools.health import register_health_tools
 from app.mcp.tools.reports import register_report_tools
 from app.mcp.tools.status import register_status_tools
 from app.mcp.tools.transactions import register_transaction_tools
+from app.utils.logging import configure_logging, get_logger
 
 mcp = FastMCP(
     "Personal Finance MCP Server",
-    instructions="MCP server for personal finance: accounts, transactions, analytics.",
+    instructions="MCP server for personal finance: accounts, transactions, analytics, budgets.",
 )
 
 register_health_tools(mcp)
 register_auth_tools(mcp)
 register_account_tools(mcp)
 register_transaction_tools(mcp)
+register_budget_tools(mcp)
 register_status_tools(mcp)
 register_analysis_tools(mcp)
 register_report_tools(mcp)

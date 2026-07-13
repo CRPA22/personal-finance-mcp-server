@@ -3,7 +3,7 @@
 import uuid
 from datetime import date as date_cls, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class TransactionCreate(BaseModel):
@@ -12,7 +12,7 @@ class TransactionCreate(BaseModel):
     account_id: uuid.UUID
     amount: float = Field(..., gt=0)
     type: str = Field(..., pattern="^(income|expense)$")
-    category: str = Field(..., min_length=1, max_length=100)
+    category: str = Field(..., min_length=1, max_length=100)  # nombre de categoría
     date: date_cls
     description: str | None = Field(default=None, max_length=500)
 
@@ -22,7 +22,7 @@ class TransactionUpdate(BaseModel):
 
     amount: float | None = Field(default=None, gt=0)
     type: str | None = Field(default=None, pattern="^(income|expense)$")
-    category: str | None = Field(default=None, min_length=1, max_length=100)
+    category: str | None = Field(default=None, min_length=1, max_length=100)  # nombre de categoría
     date: date_cls | None = None
     description: str | None = Field(default=None, max_length=500)
 
@@ -32,11 +32,21 @@ class TransactionSchema(BaseModel):
 
     id: uuid.UUID
     account_id: uuid.UUID
+    user_id: uuid.UUID
+    category_id: uuid.UUID
+    category: str = ""          # nombre resuelto desde el relationship
     amount: float
     type: str
-    category: str
     date: date_cls
     description: str | None
+    transfer_peer_id: uuid.UUID | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+    @field_validator("category", mode="before")
+    @classmethod
+    def resolve_category_name(cls, v: object) -> str:
+        if hasattr(v, "name"):
+            return v.name
+        return v or ""

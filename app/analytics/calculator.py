@@ -77,15 +77,18 @@ def _balance_from_transactions(transactions: list[TransactionRecord]) -> float:
     for tx in transactions:
         if tx.type == "income":
             total += tx.amount
-        else:
+        elif tx.type == "expense":
             total -= tx.amount
+        # transfer: ya está reflejado en los saldos de cuenta, no se suma ni resta
     return total
 
 
 def monthly_flow(transactions: list[TransactionRecord]) -> list[MonthlyFlow]:
-    """Income and expense per month."""
+    """Income and expense per month. Transfers are excluded."""
     by_month: dict[tuple[int, int], dict[str, float]] = defaultdict(lambda: {"income": 0.0, "expense": 0.0})
     for tx in transactions:
+        if tx.type == "transfer":
+            continue
         key = (tx.date.year, tx.date.month)
         if tx.type == "income":
             by_month[key]["income"] += tx.amount
@@ -128,10 +131,11 @@ def distribution_by_category(
     year: int | None = None,
     month: int | None = None,
 ) -> CategoryDistribution:
-    """Distribution by category for income or expense."""
+    """Distribution by category for income or expense. Transfers are excluded."""
     filtered = [
         t for t in transactions
         if t.type == transaction_type
+        and t.type != "transfer"
         and (year is None or t.date.year == year)
         and (month is None or t.date.month == month)
     ]
