@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.category import Category
@@ -26,7 +26,7 @@ class CategoryRepository:
         """Find a category by name and type. Checks user-specific first, then system defaults."""
         if user_id is not None:
             stmt = select(Category).where(
-                Category.name == name,
+                func.lower(Category.name) == name.lower(),
                 Category.type == category_type,
                 Category.user_id == user_id,
             )
@@ -36,7 +36,7 @@ class CategoryRepository:
 
         # Fall back to system category (user_id IS NULL)
         stmt = select(Category).where(
-            Category.name == name,
+            func.lower(Category.name) == name.lower(),
             Category.type == category_type,
             Category.user_id.is_(None),
         )
