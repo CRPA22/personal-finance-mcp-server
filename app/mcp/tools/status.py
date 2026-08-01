@@ -47,10 +47,10 @@ def register_status_tools(mcp: FastMCP) -> None:
                 status = service.get_financial_status(uid)
                 return status.model_dump_json()
         except NotFoundError as e:
-            logger.info("get_financial_status not found", extra={"message": str(e)})
+            logger.info("get_financial_status not found", extra={"detail": str(e)})
             return error_response(str(e))
         except FinanceMCPError as e:
-            logger.warning("get_financial_status domain error", extra={"message": str(e)})
+            logger.warning("get_financial_status domain error", extra={"detail": str(e)})
             return error_response(str(e))
         except Exception as e:
             logger.exception("get_financial_status unexpected error", extra={"error_type": type(e).__name__})

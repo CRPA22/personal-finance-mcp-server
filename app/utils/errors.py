@@ -41,10 +41,10 @@ def handle_tool_errors(
                 )
                 return error_response("Validation failed", details=e.errors())
             except NotFoundError as e:
-                logger.info("tool_not_found", extra={"tool": tool_name, "message": str(e)})
+                logger.info("tool_not_found", extra={"tool": tool_name, "detail": str(e)})
                 return error_response(str(e))
             except FinanceMCPError as e:
-                logger.warning("tool_domain_error", extra={"tool": tool_name, "message": str(e)})
+                logger.warning("tool_domain_error", extra={"tool": tool_name, "detail": str(e)})
                 return error_response(str(e))
             except Exception as e:
                 logger.exception(

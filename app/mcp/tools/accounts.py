@@ -105,10 +105,10 @@ def register_account_tools(mcp: FastMCP) -> None:
             logger.warning("create_account validation failed", extra={"errors": e.errors()})
             return error_response("Validation failed", details=e.errors())
         except NotFoundError as e:
-            logger.info("create_account not found", extra={"message": str(e)})
+            logger.info("create_account not found", extra={"detail": str(e)})
             return error_response(str(e))
         except FinanceMCPError as e:
-            logger.warning("create_account domain error", extra={"message": str(e)})
+            logger.warning("create_account domain error", extra={"detail": str(e)})
             return error_response(str(e))
         except Exception as e:
             logger.exception("create_account unexpected error", extra={"error_type": type(e).__name__})
@@ -190,10 +190,10 @@ def register_account_tools(mcp: FastMCP) -> None:
                 account = service.adjust_balance(aid, new_balance)
                 return account.model_dump_json()
         except NotFoundError as e:
-            logger.info("adjust_account_balance not found", extra={"message": str(e)})
+            logger.info("adjust_account_balance not found", extra={"detail": str(e)})
             return error_response(str(e))
         except FinanceMCPError as e:
-            logger.warning("adjust_account_balance domain error", extra={"message": str(e)})
+            logger.warning("adjust_account_balance domain error", extra={"detail": str(e)})
             return error_response(str(e))
         except Exception as e:
             logger.exception("adjust_account_balance unexpected error", extra={"error_type": type(e).__name__})
@@ -231,7 +231,7 @@ def register_account_tools(mcp: FastMCP) -> None:
                 service.delete(aid)
                 return json.dumps({"message": "Account deleted successfully", "account_id": account_id})
         except NotFoundError as e:
-            logger.info("delete_account not found", extra={"message": str(e)})
+            logger.info("delete_account not found", extra={"detail": str(e)})
             return error_response(str(e))
         except FinanceMCPError as e:
             return error_response(str(e))

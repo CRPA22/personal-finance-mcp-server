@@ -412,10 +412,10 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             logger.warning("add_transaction validation failed", extra={"errors": e.errors()})
             return error_response("Validation failed", details=e.errors())
         except NotFoundError as e:
-            logger.info("add_transaction not found", extra={"message": str(e)})
+            logger.info("add_transaction not found", extra={"detail": str(e)})
             return error_response(str(e))
         except FinanceMCPError as e:
-            logger.warning("add_transaction domain error", extra={"message": str(e)})
+            logger.warning("add_transaction domain error", extra={"detail": str(e)})
             return error_response(str(e))
         except Exception as e:
             logger.exception("add_transaction unexpected error", extra={"error_type": type(e).__name__})
@@ -484,10 +484,10 @@ def register_transaction_tools(mcp: FastMCP) -> None:
             logger.warning("edit_transaction validation failed", extra={"errors": e.errors()})
             return error_response("Validation failed", details=e.errors())
         except NotFoundError as e:
-            logger.info("edit_transaction not found", extra={"message": str(e)})
+            logger.info("edit_transaction not found", extra={"detail": str(e)})
             return error_response(str(e))
         except FinanceMCPError as e:
-            logger.warning("edit_transaction domain error", extra={"message": str(e)})
+            logger.warning("edit_transaction domain error", extra={"detail": str(e)})
             return error_response(str(e))
         except Exception as e:
             logger.exception("edit_transaction unexpected error", extra={"error_type": type(e).__name__})
@@ -525,7 +525,7 @@ def register_transaction_tools(mcp: FastMCP) -> None:
                 service.delete(tid)
                 return json.dumps({"message": "Transaction deleted successfully", "transaction_id": transaction_id})
         except NotFoundError as e:
-            logger.info("delete_transaction not found", extra={"message": str(e)})
+            logger.info("delete_transaction not found", extra={"detail": str(e)})
             return error_response(str(e))
         except FinanceMCPError as e:
             return error_response(str(e))
